@@ -1,0 +1,45 @@
+I measured the performance difference of tower and plain_tower by writing a
+predicate speedup/1 that uses the statistics predicate, which runs a test case
+and calculates the speedup ratio by dividing the CPU time of plain_tower by that
+of tower tested on the same test case. After averaging 10 results of speedup, I
+found that tower runs about 26.506968641114984x faster than plain_tower when
+running the following test case that looks for a 5x5 tower T given a value for
+the counts C (reindented):
+
+N=5
+C = counts(
+	[2,2,4,2,1],
+	[2,3,2,1,5],
+	[3,1,2,3,2],
+	[1,2,3,3,2])
+
+I also found an ambiguous pair of 4x4 towers that satisfies a counts C by
+running the following query:
+
+$ ?- ambiguous(4,C,T1,T2).
+
+The first results from this query are (reindented):
+
+C = counts(
+	[4,2,2,1],
+	[1,2,2,4],
+	[4,2,2,1],
+	[1,2,2,4])
+T1 = [
+	[1,2,3,4],
+	[2,1,4,3],
+	[3,4,1,2],
+	[4,3,2,1]]
+T2 = [
+	[1,2,3,4],
+	[2,4,1,3],
+	[3,1,4,2],
+	[4,3,2,1]]
+
+Many more combinations of values for C, T1, and T2 were found but not listed.
+Note - I tried to run:
+
+$ ?- ambiguous(N,C,T1,T2).
+
+But this resulted in a global stack overflow error. I provided a value for N (in
+this case N=4) and produced the results above.

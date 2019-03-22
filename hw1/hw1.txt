@@ -1,0 +1,34 @@
+subset:
+- I check each value of a recursively starting from the head and check if that value exists in b
+- Return true if all recursive calls return true
+
+equal_sets:
+- Two sets are equal if and only if a is a subset of b and b is a subset of a
+- I used the pre-defined subset function to implement this definition
+
+set_union:
+- Using the @ operator is equivalent to unioning two sets
+- A weakness in this solution is that unnecessary space is used for each list when given inputs with many duplicates
+
+set_intersection:
+- If head of a exists in b, attach head to answer
+- Else, return list excluding head of a
+- Return when subproblem reaches []
+
+set_diff:
+- If head of a does not exist in b, attach head to answer
+- Else, return list excluding head of a
+- Return when subproblem reaches []
+
+computed_fixed_point:
+- A computed fixed point stops when (f x) and x satisfy the equality predicate for f's domain
+- If equality predicate is satisfied, return x
+- Else, recursively pass in function f but pass in (f x) as the x parameter into the recursive call
+
+filter_reachable
+- I compute the 2nd value by using List.filter and passing in a function as the 1st parameter and the list of grammar rules as the 2nd
+- 1st parameter passed into List.filter is a function that checks if the 1st value of the current grammar rule exists in the list produced by the result of a computed_fixed_point call
+- computed_fixed_point takes in equal_sets function as equality predicate, function that computes all reachable non-terminals given the grammar rules, and 1st value of the grammar input as a list
+- The 2nd parameter passed into List.filter is the list of grammar rules. We want to perform the filter function on this list such that only reachable grammar rules remain in the final list
+- Initially, instead of a concat_reachable helper function, I had the concatenation code written inline
+- The code was unreadable, so I refactored the solution by defining a helper function

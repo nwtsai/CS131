@@ -1,0 +1,71 @@
+The task given for homework 2 compared to homework 1 forced me to learn how to
+think in a functional programming mindset. The list of rules was no longer
+simply just a list, but as curried functions in the right side of the grammar
+tuple.
+
+Some difficulties along the way include thinking about the acceptor function in
+designing make_matcher. Designing make_matcher was difficult and required
+thinking about how to keep track of states among a recursive stack, especially
+when it comes to thinking about the acceptor. Initially, I ran into a lot of
+bugs because I was using the same acceptor function at each level of recursion.
+After examining the code, I realized that this ignores the rules between the
+root and the leaves. Instead, an acceptor should always take into account the
+current recursive state. This can be achieved by treating the acceptor as a
+curried function with the tail of the current rule. This essentially allows the
+algorithm to keep track of which rule is applicable at which level. Whenever a
+recursive call is performed on a nonterminal symbol, the acceptor function
+increases in size. Now an entire rule can only be accepted if the acceptor
+function at each level accepts the given fragment.
+
+The general implementation of make_matcher includes defining two simultaneous
+recursive functions m1 and m2. m1 takes the start symbol, a complete list of
+rules, an acceptor function, a fragment, and the list of rules for the current
+start symbol. The function goes through each rule in order and tries to match
+it with the fragment by calling m2. m2 attempts to perform a complete match on
+the given fragment. For the first rule that matches, the acceptor is called on
+the fragment. If this doesn't work, it will try to match the head of the current
+rule with the head of the fragment. If the first symbol is a nonterminal symbol,
+we refer recursively back to m1 by treating the current symbol as the new start
+symbol. Essentially, each time we call m1, we are generating a new recursive
+stack. If however the first symbol is a terminal symbol, we check if the first
+item of the fragment equals the first terminal symbol. If this is the case, then
+we recursively check if the other terminal symbols also match on the remaining
+fragment. If there is no match None is simply returned. Finally, once the two
+recursive functions are defined within the scope of make_matcher, we can kick
+off the desired functionality by initially calling m1 with the start symbol,
+which is also the first item in the grammar tuple, the list of grammar rules,
+the acceptor function, the initial fragment, and a list of rules for the initial
+start symbol. This returns the final values that fit the matched and accepted
+criteria wrapped in a Some type if something is found or a None type otherwise.
+
+However, despite solving this problem and understanding the acceptor nuances,
+this solution still has shortcomings. Particularly, the grammar is expected to
+follow a strict format. The format of the grammar rules must be given in a left
+associative manner. If not, the algorithm will go into an infinite loop. For
+example, if Expr has a rule where Expr -> Expr... such that Expr exists in the
+left hand side and is also the first nonterminal symbol of the right hand side,
+it will try to match Expr by recursively calling m1 with Expr as the start
+symbol. But this is exactly the same call we made to kick off the algorithm
+because Expr is also the start symbol associated with the original grammar. In
+this case, no work will be done and the algorithm will infinitely call the
+recursive function m1 with the same parameters, producing an infinite loop.
+
+I decided to use the general approach to constructing make_matcher in my
+solution for make_parser. I modified make_matcher by including an accumulator
+variable in the internal helper functions. The purpose of the accumulator is to
+keep track of which rules actually get matched to the sentence. I created my own
+acceptor function that only accepts if the suffix is empty, meaning that the
+entire tree is matched. Finally, once a list of matched rules are generated,
+this essentially represents a flattened tree. I wrote two more helper functions
+that convert a flattened tree to a tree comprised of Nodes and Leaves. Finally,
+make_parser returns the root of the tree created from traversing the matched
+rules list and wraps it in a Some constructor.
+
+I did not combine the helper functions m1 and m2 because they return different
+types in make_matcher and make_parser. In make_parser, the acceptor defined
+takes a tuple of two arguments and thus returns the flattened list.
+
+A weakness of my implementation is that there is very similar code being
+duplicated in the helper functions of make_matcher and make_parser. I chose to
+separate the code this way because the internal helper functions do different
+tasks.
